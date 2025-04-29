@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using VirtualizationLab1.Data;
-using VirtualizationLab1.Models;
+using VirtualizationLab.Data;
+using VirtualizationLab.Models;
 
-namespace VirtualizationLab1.Controllers
+namespace VirtualizationLab.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

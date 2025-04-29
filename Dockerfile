@@ -7,4 +7,4 @@ RUN dotnet publish -c Release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /app .
-ENTRYPOINT ["dotnet", "VirtualizationLab1.dll"]
+ENTRYPOINT ["dotnet", "VirtualizationLab.dll"]

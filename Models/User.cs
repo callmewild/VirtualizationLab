@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace VirtualizationLab1.Models
+namespace VirtualizationLab.Models
 {
     public class User
     {

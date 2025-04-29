@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using VirtualizationLab1.Data;
+using VirtualizationLab.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

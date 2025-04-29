@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using VirtualizationLab1.Models;
+using VirtualizationLab.Models;
 
-namespace VirtualizationLab1.Data
+namespace VirtualizationLab.Data
 {
     public class AppDbContext : DbContext
     {

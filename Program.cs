@@ -3,14 +3,16 @@ using VirtualizationLab1.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем конфигурацию БД
-var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
-var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
-var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "appdb";
-var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "admin";
-var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "password";
+// Явно указываем порт 80 для .NET 9
+builder.WebHost.UseUrls("http://*:80");
 
-var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
+// Конфигурация БД
+var connectionString = builder.Configuration.GetConnectionString("Default") 
+    ?? $"Host={Environment.GetEnvironmentVariable("DB_HOST") ?? "db"};"
+     + $"Port={Environment.GetEnvironmentVariable("DB_PORT") ?? "5432"};"
+     + $"Database={Environment.GetEnvironmentVariable("DB_NAME") ?? "appdb"};"
+     + $"Username={Environment.GetEnvironmentVariable("DB_USER") ?? "admin"};"
+     + $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "password"}";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -19,13 +21,13 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Применяем миграции при запуске
+// Автоматические миграции
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
 }
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

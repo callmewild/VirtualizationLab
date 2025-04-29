@@ -9,22 +9,58 @@ services:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: appdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d appdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  labapp:
+    image: ghcr.io/callmewild/virtualizationlab1:latest
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: appdb
+      DB_USER: admin
+      DB_PASSWORD: password
+    depends_on:
+      db:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.labapp.rule=Host(`app.localhost`)"
+      - "traefik.http.routers.labapp.entrypoints=websecure"
+      - "traefik.http.services.labapp.loadbalancer.server.port=80"
 
   whoami:
     image: traefik/whoami
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
 
-  labapp:
-    image: ghcr.io/callmewild/virtualizationlab:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.labapp.rule=Host(`app.localhost`)"
-      - "traefik.http.routers.labapp.entrypoints=web"
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: lab-network
+    driver: bridge

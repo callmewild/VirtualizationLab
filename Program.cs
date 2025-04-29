@@ -1,12 +1,31 @@
+using Microsoft.EntityFrameworkCore;
+using VirtualizationLab1.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Добавляем конфигурацию БД
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
+var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "appdb";
+var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "admin";
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "password";
+
+var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
-builder.WebHost.UseUrls("http://*:80");
-
-app.MapGet("/", () => 
+// Применяем миграции при запуске
+using (var scope = app.Services.CreateScope())
 {
-    var random = new Random();
-    return $"Random number: {random.Next(1, 100)}. Current time: {DateTime.Now}";
-});
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
+app.MapControllers();
 
 app.Run();

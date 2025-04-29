@@ -12,3 +12,4 @@ obj/
 *.bak
 *.tmp
 *.log
+*.pem

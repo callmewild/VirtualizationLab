@@ -7,9 +7,7 @@ obj/
 *.cache
 *.swp
 .DS_Store
-docker-compose.*
 .env
-*.dockerignore
 *.ps1
 *.bak
 *.tmp
